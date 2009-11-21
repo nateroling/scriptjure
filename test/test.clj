@@ -40,9 +40,9 @@
 
 (deftest test-if
   (is (= (strip-whitespace (js (if (&& (== foo bar) (!= foo baz)) (.draw google.chart))))
-	 "if (((foo == bar) && (foo != baz))) { google.chart.draw() }"))
+         "function () { if (((foo == bar) && (foo != baz))) { return google.chart.draw(); } }();"))
   (is (= (strip-whitespace (js (if foo (do (var x 3) (foo x)) (do (var y 4) (bar y)))))
-	 "if (foo) { var x = 3; foo(x); } else { var y = 4; bar(y); }")))
+	 "function () { if (foo) { return function () { var x = 3; return foo(x); }(); } else { return function () { var y = 4; return bar(y); }(); } }();")))
           
 (deftest test-new-operator
   (is (= (js (new google.visualization.ColumnChart (.getElementById document "chart_div"))) "new google.visualization.ColumnChart(document.getElementById(\"chart_div\"))")))
@@ -68,7 +68,7 @@
 	  (js 
 	   (var x 3)
 	   (var y 4)
-	   (+ x y))) "var x = 3; var y = 4; (x + y);")))
+	   (+ x y))) "function () { var x = 3; var y = 4; return (x + y); }();")))
 
 (deftest test-combine-forms
   (let [stuff (quote (do

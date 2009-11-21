@@ -94,13 +94,14 @@
   (emit-method obj method args))
 
 (defmethod emit-special 'if [type [if test true-form & false-form]]
-  (str "if (" (emit test) ") { \n"
-       (emit true-form)
+  (statement (str "function () { if (" (emit test) ") { \n"
+       (str "return " (statement (emit true-form)))
        "\n }"
        (when (first false-form)
 	 (str " else { \n"
-	      (emit (first false-form))
-	      " }"))))
+	      (str "return " (statement (emit (first false-form))))
+	      " }"))
+       " }()")))
        
 (defmethod emit-special 'dot-method [type [method obj & args]]
   (let [method (symbol (str/drop (str method) 1))]
@@ -119,7 +120,16 @@
   (str "new " (emit class) (comma-list (map emit args))))
 
 (defn emit-do [exprs]
-  (str/join "" (map (comp statement emit) exprs)))
+  (cond
+   (= (count exprs) 0) ""
+   (= (count exprs) 1) ((comp statement  emit) (first exprs))
+   true (let [statements (map (comp statement emit) exprs)]
+          (statement
+           (str "function () {\n"
+                (str/join "" (butlast statements))
+                "return "
+                (last statements)
+                "}()")))))
 
 (defmethod emit-special 'do [type [ do & exprs]]
   (emit-do exprs))
