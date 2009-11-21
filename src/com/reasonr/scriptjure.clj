@@ -137,7 +137,7 @@
 (defn emit-function [name sig body]
   (assert (or (symbol? name) (nil? name)))
   (assert (vector? sig))
-  (str "function " name (comma-list sig) " {\n" (emit-do body) " }\n"))
+  (str "function " name (comma-list sig) " {\n" (apply str (map (comp statement emit) body)) " }\n"))
 
 (defmethod emit-special 'fn [type [fn & expr]]
   (if (symbol? (first expr))
