@@ -75,5 +75,5 @@
 		       (var x 3)
 		       (var y 4)))]
     (is (= (strip-whitespace (js (fn foo [x] (clj stuff))))
-	   "function foo(x) { var x = 3; var y = 4; }"))))
+	   "function foo(x) { function () { var x = 3; return var y = 4; }(); }"))))
 (run-tests)
